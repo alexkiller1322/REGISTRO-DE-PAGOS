@@ -1,4 +1,4 @@
-/* Reset general */
+/* Estilos generales */
 * {
     margin: 0;
     padding: 0;
@@ -7,48 +7,80 @@
 
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    background-color: #f4f4f9;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
+    text-align: center;
+    color: #333;
 }
 
 .container {
-    text-align: center;
-    padding: 20px;
     background-color: #fff;
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 300px;
+    padding: 30px;
+    width: 100%;
+    max-width: 400px;
+}
+
+header {
+    margin-bottom: 20px;
+}
+
+.logo {
+    width: 120px;  /* Ajusta según el tamaño de tu logo */
+    margin-bottom: 20px;
 }
 
 h1 {
     font-size: 24px;
-    margin-bottom: 20px;
-}
-
-button {
-    padding: 10px 20px;
-    margin: 10px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 16px;
-}
-
-button:hover {
-    background-color: #45a049;
-}
-
-button:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
+    color: #1a73e8;
+    margin-bottom: 10px;
 }
 
 p {
     font-size: 18px;
     margin-bottom: 20px;
+}
+
+.buttons-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn {
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background-color: #155ab6;
+}
+
+/* Estilo para la lista de pagos */
+h2 {
+    margin-top: 30px;
+    font-size: 20px;
+    color: #333;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 10px;
+}
+
+li {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 10px;
 }
