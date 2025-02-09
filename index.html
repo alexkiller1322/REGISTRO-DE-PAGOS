@@ -10,72 +10,17 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <img src="logo.png" alt="Logo de la aplicación" class="logo">
-            <h1>Registro de Pagos</h1>
-        </header>
-        
+        <h1>Registro de Pagos</h1>
         <p>Pagos realizados: <span id="pagosRealizados">0</span> / 100</p>
+
+        <label for="fechaPago">Fecha de pago:</label>
+        <input type="date" id="fechaPago">
         
-        <div class="buttons-container">
-            <button id="registrarPago" class="btn">Registrar Pago</button>
-            <button id="activarNotificaciones" class="btn">Activar Notificaciones</button>
-        </div>
+        <button id="registrarPago">Registrar Pago</button>
+        <button id="generarEstadoCuenta">Generar Estado de Cuenta</button>
         
-        <!-- Mostrar las fechas de los pagos -->
-        <h2>Fechas de pagos:</h2>
-        <ul id="listaPagos"></ul>
+        <h2>Historial de Pagos</h2>
+        <ul id="historialPagos"></ul>
     </div>
-    
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            let pagosRealizados = JSON.parse(localStorage.getItem("pagosRealizados")) || [];
-            const pagosMaximos = 100;
-            const pagosRealizadosElemento = document.getElementById("pagosRealizados");
-            const registrarPagoBtn = document.getElementById("registrarPago");
-            const activarNotificacionesBtn = document.getElementById("activarNotificaciones");
-            const listaPagosElemento = document.getElementById("listaPagos");
-    
-            pagosRealizadosElemento.textContent = pagosRealizados.length;
-            mostrarFechasDePagos(pagosRealizados);
-    
-            registrarPagoBtn.addEventListener("click", () => {
-                if (pagosRealizados.length < pagosMaximos) {
-                    const fechaPago = new Date().toLocaleString();
-                    pagosRealizados.push(fechaPago);
-                    localStorage.setItem("pagosRealizados", JSON.stringify(pagosRealizados));
-                    pagosRealizadosElemento.textContent = pagosRealizados.length;
-                    mostrarFechasDePagos(pagosRealizados);
-                } else {
-                    alert("Has alcanzado el límite de 100 pagos.");
-                }
-            });
-    
-            activarNotificacionesBtn.addEventListener("click", () => {
-                Notification.requestPermission().then(permission => {
-                    if (permission === "granted") {
-                        programarNotificacion();
-                    }
-                });
-            });
-    
-            function programarNotificacion() {
-                setInterval(() => {
-                    new Notification("Recordatorio de pago", {
-                        body: "Es momento de registrar tu pago de 1000 pesos."
-                    });
-                }, 518400000); // 6 días en milisegundos
-            }
-    
-            function mostrarFechasDePagos(pagos) {
-                listaPagosElemento.innerHTML = '';
-                pagos.forEach(pago => {
-                    const li = document.createElement("li");
-                    li.textContent = pago;
-                    listaPagosElemento.appendChild(li);
-                });
-            }
-        });
-    </script>
 </body>
 </html>
