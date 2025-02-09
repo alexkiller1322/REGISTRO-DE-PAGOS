@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const fechaPagoInput = document.getElementById("fechaPago");
 
     descargarEstadoCuentaBtn.textContent = "Descargar Estado de Cuenta";
-    descargarEstadoCuentaBtn.style.display = "none"; // Oculto hasta que haya pagos
+    descargarEstadoCuentaBtn.style.display = "none";
     document.querySelector(".container").appendChild(descargarEstadoCuentaBtn);
 
     actualizarPagos();
@@ -63,6 +63,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function descargarEstadoCuentaPDF() {
+        if (typeof window.jspdf === "undefined") {
+            alert("jsPDF no está cargado correctamente.");
+            return;
+        }
+
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
 
@@ -70,10 +75,15 @@ document.addEventListener("DOMContentLoaded", () => {
         doc.text("Estado de Cuenta", 20, 20);
         doc.setFontSize(12);
 
-        pagos.forEach((fecha, index) => {
-            doc.text(`Pago ${index + 1}: ${fecha}`, 20, 30 + index * 10);
-        });
+        if (pagos.length === 0) {
+            doc.text("No hay pagos registrados.", 20, 30);
+        } else {
+            pagos.forEach((fecha, index) => {
+                doc.text(`Pago ${index + 1}: ${fecha}`, 20, 30 + index * 10);
+            });
+        }
 
         doc.save("estado_de_cuenta.pdf");
     }
 });
+
