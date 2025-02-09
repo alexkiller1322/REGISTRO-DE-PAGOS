@@ -4,8 +4,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const pagosRealizadosElemento = document.getElementById("pagosRealizados");
     const registrarPagoBtn = document.getElementById("registrarPago");
     const generarEstadoCuentaBtn = document.getElementById("generarEstadoCuenta");
+    const descargarEstadoCuentaBtn = document.createElement("button");
     const historialPagosElemento = document.getElementById("historialPagos");
     const fechaPagoInput = document.getElementById("fechaPago");
+
+    descargarEstadoCuentaBtn.textContent = "Descargar Estado de Cuenta";
+    descargarEstadoCuentaBtn.style.display = "none"; // Oculto hasta que haya pagos
+    document.querySelector(".container").appendChild(descargarEstadoCuentaBtn);
 
     actualizarPagos();
 
@@ -26,11 +31,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     generarEstadoCuentaBtn.addEventListener("click", () => {
-        let estadoCuenta = "Estado de Cuenta:\n\n";
-        pagos.forEach((fecha, index) => {
-            estadoCuenta += `Pago ${index + 1}: ${fecha}\n`;
-        });
-        alert(estadoCuenta);
+        mostrarEstadoCuenta();
+    });
+
+    descargarEstadoCuentaBtn.addEventListener("click", () => {
+        descargarEstadoCuentaPDF();
     });
 
     function actualizarPagos() {
@@ -41,6 +46,34 @@ document.addEventListener("DOMContentLoaded", () => {
             li.textContent = `Pago realizado el ${fecha}`;
             historialPagosElemento.appendChild(li);
         });
+
+        if (pagos.length > 0) {
+            descargarEstadoCuentaBtn.style.display = "block";
+        } else {
+            descargarEstadoCuentaBtn.style.display = "none";
+        }
+    }
+
+    function mostrarEstadoCuenta() {
+        let estadoCuenta = "Estado de Cuenta:\n\n";
+        pagos.forEach((fecha, index) => {
+            estadoCuenta += `Pago ${index + 1}: ${fecha}\n`;
+        });
+        alert(estadoCuenta);
+    }
+
+    function descargarEstadoCuentaPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.setFontSize(16);
+        doc.text("Estado de Cuenta", 20, 20);
+        doc.setFontSize(12);
+
+        pagos.forEach((fecha, index) => {
+            doc.text(`Pago ${index + 1}: ${fecha}`, 20, 30 + index * 10);
+        });
+
+        doc.save("estado_de_cuenta.pdf");
     }
 });
-
