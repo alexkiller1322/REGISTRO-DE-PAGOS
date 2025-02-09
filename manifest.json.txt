@@ -1,0 +1,16 @@
+{
+    "name": "Registro de Pagos",
+    "short_name": "Pagos",
+    "description": "Una aplicación para registrar pagos de 1000 pesos.",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#4CAF50",
+    "icons": [
+        {
+            "src": "icon.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        }
+    ]
+}
