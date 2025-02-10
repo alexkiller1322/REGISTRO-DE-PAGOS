@@ -17,6 +17,14 @@
         <button id="descargarEstadoCuenta">Descargar Estado de Cuenta (Excel)</button> <!-- Nuevo botón para descargar el estado de cuenta en Excel -->
     </div>
 
+    <!-- Selector de fecha oculto, solo se muestra cuando el usuario hace clic en "Registrar Pago" -->
+    <div id="fechaPagoContainer" style="display:none;">
+        <label for="fechaPago">Selecciona la fecha del pago:</label>
+        <input type="date" id="fechaPago" name="fechaPago">
+        <button id="guardarPago">Guardar Pago</button>
+        <button id="cancelarPago">Cancelar</button>
+    </div>
+
     <!-- Librería de SheetJS para generar el archivo Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script> 
 
@@ -28,20 +36,38 @@
             const registrarPagoBtn = document.getElementById("registrarPago");
             const activarNotificacionesBtn = document.getElementById("activarNotificaciones");
             const descargarEstadoCuentaBtn = document.getElementById("descargarEstadoCuenta");
+            const fechaPagoContainer = document.getElementById("fechaPagoContainer");
+            const fechaPagoInput = document.getElementById("fechaPago");
+            const guardarPagoBtn = document.getElementById("guardarPago");
+            const cancelarPagoBtn = document.getElementById("cancelarPago");
 
             pagosRealizadosElemento.textContent = pagosRealizados.length;
 
             registrarPagoBtn.addEventListener("click", () => {
                 if (pagosRealizados.length < pagosMaximos) {
-                    const fechaPago = prompt("Ingresa la fecha del pago (formato: yyyy-mm-dd):");
-                    if (fechaPago) {
-                        pagosRealizados.push({ fecha: fechaPago });
-                        localStorage.setItem("pagosRealizados", JSON.stringify(pagosRealizados));
-                        pagosRealizadosElemento.textContent = pagosRealizados.length;
-                    }
+                    // Mostrar el selector de fecha
+                    fechaPagoContainer.style.display = "block";
                 } else {
                     alert("Has alcanzado el límite de 100 pagos.");
                 }
+            });
+
+            guardarPagoBtn.addEventListener("click", () => {
+                const fechaPago = fechaPagoInput.value;
+                if (fechaPago) {
+                    pagosRealizados.push({ fecha: fechaPago });
+                    localStorage.setItem("pagosRealizados", JSON.stringify(pagosRealizados));
+                    pagosRealizadosElemento.textContent = pagosRealizados.length;
+                    fechaPagoContainer.style.display = "none"; // Ocultar el calendario
+                    fechaPagoInput.value = ""; // Limpiar el campo de fecha
+                } else {
+                    alert("Por favor, selecciona una fecha.");
+                }
+            });
+
+            cancelarPagoBtn.addEventListener("click", () => {
+                fechaPagoContainer.style.display = "none"; // Ocultar el calendario
+                fechaPagoInput.value = ""; // Limpiar el campo de fecha
             });
 
             activarNotificacionesBtn.addEventListener("click", () => {
