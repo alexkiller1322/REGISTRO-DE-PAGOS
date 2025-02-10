@@ -1,43 +1,119 @@
+/* Color de fondo de la página */
 body {
     font-family: Arial, sans-serif;
     text-align: center;
-    background-color: #f4f4f4;
+    background-color: #f0f8ff;  /* Azul claro */
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Mexican_peso_sign.svg/1200px-Mexican_peso_sign.svg.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 5%;
 }
 
+/* Estilo del contenedor principal */
 .container {
     max-width: 400px;
     margin: 50px auto;
-    background: white;
+    background: #ffffff;
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Títulos */
+h1 {
+    color: #3a5a40;  /* Verde oscuro */
+    font-size: 2em;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+h1::before {
+    content: "💰";  /* Icono de signo de peso */
+    font-size: 2.5em;
+    position: absolute;
+    left: -40px;
+    top: -10px;
+}
+
+/* Botones */
 button {
     display: block;
     width: 100%;
     margin-top: 10px;
-    padding: 10px;
-    background: #28a745;
+    padding: 12px;
+    background-color: #28a745;  /* Verde */
     color: white;
+    font-size: 1em;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
-    background: #218838;
+    background-color: #218838;  /* Verde más oscuro */
 }
 
+button:active {
+    background-color: #1e7e34;  /* Verde aún más oscuro */
+}
+
+/* Estilo de la lista de pagos */
 ul {
     list-style: none;
     padding: 0;
+    margin-top: 20px;
 }
 
 li {
-    background: #e9ecef;
+    background-color: #f8f9fa;  /* Gris muy claro */
     margin: 5px;
-    padding: 8px;
-    border-radius: 5px;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    font-size: 1.1em;
+    position: relative;
 }
+
+li::before {
+    content: "💵";  /* Icono de billete */
+    font-size: 1.5em;
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Texto principal */
+p {
+    font-size: 1.2em;
+    color: #333333;
+}
+
+/* Estilo de la fecha de pago */
+input[type="date"] {
+    padding: 10px;
+    font-size: 1em;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    margin-top: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+input[type="date"]:focus {
+    border-color: #28a745;
+}
+
+/* Estilo del botón de descargar estado de cuenta */
+button#descargarEstadoCuenta {
+    background-color: #007bff;  /* Azul */
+    margin-top: 15px;
+}
+
+button#descargarEstadoCuenta:hover {
+    background-color: #0056b3;  /* Azul más oscuro */
+}
+
 
