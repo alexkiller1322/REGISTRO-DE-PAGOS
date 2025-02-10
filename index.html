@@ -3,87 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weld Map Creator</title>
+    <title>Registro de Pagos</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
     <script defer src="app.js"></script>
     <!-- Fuente de iconos Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <h1>Crear Weld Map</h1>
-        <p>Sube una imagen de tu dibujo y crea un mapa de soldadura</p>
+        <h1>Registro de Pagos <i class="fas fa-dollar-sign"></i> <i class="fas fa-money-bill-wave"></i></h1>
+        <p>Pagos realizados: <span id="pagosRealizados">0</span> / 100</p>
         
-        <!-- Subir imagen -->
-        <input type="file" id="uploadImage" accept="image/*">
+        <!-- Botón de seleccionar fecha de pago -->
+        <button id="seleccionarFechaPago">Selecciona Fecha de Pago</button>
+
+        <!-- Nuevo botón para descargar el estado de cuenta en Excel -->
+        <button id="descargarEstadoCuenta">Descargar Estado de Cuenta (Excel)</button>
         
-        <div id="imageContainer">
-            <!-- Aquí se mostrará la imagen subida -->
-            <canvas id="weldMapCanvas"></canvas>
-        </div>
-
-        <!-- Botón para descargar el Weld Map generado -->
-        <button id="descargarWeldMap">Descargar Weld Map</button>
-
+        <!-- Iconos de dinero como adornos -->
         <div class="iconos-dinero">
             <i class="fas fa-coins"></i>
             <i class="fas fa-dollar-sign"></i>
+            <i class="fas fa-money-bill-wave"></i>
             <i class="fas fa-wallet"></i>
             <i class="fas fa-credit-card"></i>
         </div>
     </div>
 
+    <!-- Selector de fecha oculto, solo se muestra cuando el usuario hace clic en "Seleccionar Fecha de Pago" -->
+    <div id="fechaPagoContainer" style="display:none;">
+        <label for="fechaPago">Selecciona la fecha del pago:</label>
+        <input type="date" id="fechaPago" name="fechaPago">
+        <button id="guardarPago">Guardar Pago</button>
+        <button id="cancelarPago">Cancelar</button>
+    </div>
+
+    <!-- Librería de SheetJS para generar el archivo Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script> 
+
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const uploadImageInput = document.getElementById("uploadImage");
-            const canvas = document.getElementById("weldMapCanvas");
-            const ctx = canvas.getContext("2d");
-            const descargarWeldMapBtn = document.getElementById("descargarWeldMap");
+            let pagosRealizados = JSON.parse(localStorage.getItem("pagosRealizados")) || [];
+            const pagosMaximos = 100;
+            const pagosRealizadosElemento = document.getElementById("pagosRealizados");
+            const seleccionarFechaPagoBtn = document.getElementById("seleccionarFechaPago");
+            const descargarEstadoCuentaBtn = document.getElementById("descargarEstadoCuenta");
+            const fechaPagoContainer = document.getElementById("fechaPagoContainer");
+            const fechaPagoInput = document.getElementById("fechaPago");
+            const guardarPagoBtn = document.getElementById("guardarPago");
+            const cancelarPagoBtn = document.getElementById("cancelarPago");
 
-            // Recuperar imagen guardada en localStorage si existe
-            const savedImage = localStorage.getItem("savedImage");
-            if (savedImage) {
-                const img = new Image();
-                img.onload = function() {
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpiar el canvas
-                    ctx.drawImage(img, 0, 0); // Dibujar la imagen desde localStorage
-                };
-                img.src = savedImage;
-            }
+            pagosRealizadosElemento.textContent = pagosRealizados.length;
 
-            uploadImageInput.addEventListener("change", handleImageUpload);
-
-            let img = new Image();
-
-            // Función para manejar la carga de la imagen
-            function handleImageUpload(event) {
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        img.onload = function() {
-                            // Ajustar el tamaño del canvas al tamaño de la imagen
-                            canvas.width = img.width;
-                            canvas.height = img.height;
-                            ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpiar el canvas
-                            ctx.drawImage(img, 0, 0); // Dibujar la imagen en el canvas
-                            // Guardar la imagen en localStorage como base64
-                            localStorage.setItem("savedImage", e.target.result);
-                        };
-                        img.src = e.target.result; // Cargar la imagen en el objeto img
-                    };
-                    reader.readAsDataURL(file); // Leer la imagen como Data URL
+            seleccionarFechaPagoBtn.addEventListener("click", () => {
+                if (pagosRealizados.length < pagosMaximos) {
+                    // Mostrar el selector de fecha
+                    fechaPagoContainer.style.display = "block";
+                } else {
+                    alert("Has alcanzado el límite de 100 pagos.");
                 }
-            }
+            });
 
-            // Función para descargar el Weld Map generado
-            descargarWeldMapBtn.addEventListener("click", () => {
-                const dataURL = canvas.toDataURL("image/png"); // Obtener la imagen como Data URL
+            guardarPagoBtn.addEventListener("click", () => {
+                const fechaPago = fechaPagoInput.value;
+                if (fechaPago) {
+                    pagosRealizados.push({ fecha: fechaPago });
+                    localStorage.setItem("pagosRealizados", JSON.stringify(pagosRealizados));
+                    pagosRealizadosElemento.textContent = pagosRealizados.length;
+                    fechaPagoContainer.style.display = "none"; // Ocultar el calendario
+                    fechaPagoInput.value = ""; // Limpiar el campo de fecha
+                } else {
+                    alert("Por favor, selecciona una fecha.");
+                }
+            });
+
+            cancelarPagoBtn.addEventListener("click", () => {
+                fechaPagoContainer.style.display = "none"; // Ocultar el calendario
+                fechaPagoInput.value = ""; // Limpiar el campo de fecha
+            });
+
+            // Función para descargar el estado de cuenta en formato Excel
+            descargarEstadoCuentaBtn.addEventListener("click", () => {
+                if (pagosRealizados.length === 0) {
+                    alert("No hay pagos registrados.");
+                    return;
+                }
+
+                const ws = XLSX.utils.json_to_sheet(pagosRealizados); // Convierte los pagos en una hoja de Excel
+                const wb = XLSX.utils.book_new(); // Crea un nuevo libro de trabajo
+                XLSX.utils.book_append_sheet(wb, ws, "Estado de Cuenta"); // Agrega la hoja al libro
+                const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+
+                const blob = new Blob([wbout], { type: "application/octet-stream" }); // Crea un blob para la descarga
                 const link = document.createElement("a");
-                link.href = dataURL;
-                link.download = "weld_map.png"; // Nombre del archivo de descarga
+                link.href = URL.createObjectURL(blob);
+                link.download = "estado_de_cuenta.xlsx"; // Nombre del archivo de descarga
                 link.click();
             });
         });
