@@ -7,17 +7,31 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
     <script defer src="app.js"></script>
+    <!-- Fuente de iconos Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <h1>Registro de Pagos</h1>
+        <h1>Registro de Pagos <i class="fas fa-dollar-sign"></i> <i class="fas fa-money-bill-wave"></i></h1>
         <p>Pagos realizados: <span id="pagosRealizados">0</span> / 100</p>
-        <button id="registrarPago">Registrar Pago</button>
-        <button id="activarNotificaciones">Activar Notificaciones</button>
-        <button id="descargarEstadoCuenta">Descargar Estado de Cuenta (Excel)</button> <!-- Nuevo botón para descargar el estado de cuenta en Excel -->
+        
+        <!-- Botón de seleccionar fecha de pago -->
+        <button id="seleccionarFechaPago">Selecciona Fecha de Pago</button>
+
+        <!-- Nuevo botón para descargar el estado de cuenta en Excel -->
+        <button id="descargarEstadoCuenta">Descargar Estado de Cuenta (Excel)</button>
+        
+        <!-- Iconos de dinero como adornos -->
+        <div class="iconos-dinero">
+            <i class="fas fa-coins"></i>
+            <i class="fas fa-dollar-sign"></i>
+            <i class="fas fa-money-bill-wave"></i>
+            <i class="fas fa-wallet"></i>
+            <i class="fas fa-credit-card"></i>
+        </div>
     </div>
 
-    <!-- Selector de fecha oculto, solo se muestra cuando el usuario hace clic en "Registrar Pago" -->
+    <!-- Selector de fecha oculto, solo se muestra cuando el usuario hace clic en "Seleccionar Fecha de Pago" -->
     <div id="fechaPagoContainer" style="display:none;">
         <label for="fechaPago">Selecciona la fecha del pago:</label>
         <input type="date" id="fechaPago" name="fechaPago">
@@ -33,8 +47,7 @@
             let pagosRealizados = JSON.parse(localStorage.getItem("pagosRealizados")) || [];
             const pagosMaximos = 100;
             const pagosRealizadosElemento = document.getElementById("pagosRealizados");
-            const registrarPagoBtn = document.getElementById("registrarPago");
-            const activarNotificacionesBtn = document.getElementById("activarNotificaciones");
+            const seleccionarFechaPagoBtn = document.getElementById("seleccionarFechaPago");
             const descargarEstadoCuentaBtn = document.getElementById("descargarEstadoCuenta");
             const fechaPagoContainer = document.getElementById("fechaPagoContainer");
             const fechaPagoInput = document.getElementById("fechaPago");
@@ -43,7 +56,7 @@
 
             pagosRealizadosElemento.textContent = pagosRealizados.length;
 
-            registrarPagoBtn.addEventListener("click", () => {
+            seleccionarFechaPagoBtn.addEventListener("click", () => {
                 if (pagosRealizados.length < pagosMaximos) {
                     // Mostrar el selector de fecha
                     fechaPagoContainer.style.display = "block";
@@ -69,22 +82,6 @@
                 fechaPagoContainer.style.display = "none"; // Ocultar el calendario
                 fechaPagoInput.value = ""; // Limpiar el campo de fecha
             });
-
-            activarNotificacionesBtn.addEventListener("click", () => {
-                Notification.requestPermission().then(permission => {
-                    if (permission === "granted") {
-                        programarNotificacion();
-                    }
-                });
-            });
-
-            function programarNotificacion() {
-                setInterval(() => {
-                    new Notification("Recordatorio de pago", {
-                        body: "Es momento de registrar tu pago de 1000 pesos."
-                    });
-                }, 518400000); // 6 días en milisegundos
-            }
 
             // Función para descargar el estado de cuenta en formato Excel
             descargarEstadoCuentaBtn.addEventListener("click", () => {
