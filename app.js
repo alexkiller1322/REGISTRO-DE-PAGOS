@@ -1,89 +1,58 @@
 document.addEventListener("DOMContentLoaded", () => {
-    let pagos = JSON.parse(localStorage.getItem("pagos")) || [];
-    const maxPagos = 100;
+    let pagosRealizados = JSON.parse(localStorage.getItem("pagosRealizados")) || [];
+    const pagosMaximos = 100;
     const pagosRealizadosElemento = document.getElementById("pagosRealizados");
     const registrarPagoBtn = document.getElementById("registrarPago");
-    const generarEstadoCuentaBtn = document.getElementById("generarEstadoCuenta");
-    const descargarEstadoCuentaBtn = document.createElement("button");
-    const historialPagosElemento = document.getElementById("historialPagos");
-    const fechaPagoInput = document.getElementById("fechaPago");
+    const activarNotificacionesBtn = document.getElementById("activarNotificaciones");
+    const descargarEstadoCuentaBtn = document.getElementById("descargarEstadoCuenta");
 
-    descargarEstadoCuentaBtn.textContent = "Descargar Estado de Cuenta";
-    descargarEstadoCuentaBtn.style.display = "none";
-    document.querySelector(".container").appendChild(descargarEstadoCuentaBtn);
-
-    actualizarPagos();
+    pagosRealizadosElemento.textContent = pagosRealizados.length;
 
     registrarPagoBtn.addEventListener("click", () => {
-        if (pagos.length < maxPagos) {
-            const fechaPago = fechaPagoInput.value;
-            if (!fechaPago) {
-                alert("Por favor, selecciona una fecha.");
-                return;
+        if (pagosRealizados.length < pagosMaximos) {
+            const fechaPago = prompt("Ingresa la fecha del pago (formato: yyyy-mm-dd):");
+            if (fechaPago) {
+                pagosRealizados.push({ fecha: fechaPago });
+                localStorage.setItem("pagosRealizados", JSON.stringify(pagosRealizados));
+                pagosRealizadosElemento.textContent = pagosRealizados.length;
             }
-
-            pagos.push(fechaPago);
-            localStorage.setItem("pagos", JSON.stringify(pagos));
-            actualizarPagos();
         } else {
             alert("Has alcanzado el límite de 100 pagos.");
         }
     });
 
-    generarEstadoCuentaBtn.addEventListener("click", () => {
-        mostrarEstadoCuenta();
+    activarNotificacionesBtn.addEventListener("click", () => {
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                programarNotificacion();
+            }
+        });
     });
 
+    function programarNotificacion() {
+        setInterval(() => {
+            new Notification("Recordatorio de pago", {
+                body: "Es momento de registrar tu pago de 1000 pesos."
+            });
+        }, 518400000); // 6 días en milisegundos
+    }
+
+    // Función para descargar el estado de cuenta en formato Excel
     descargarEstadoCuentaBtn.addEventListener("click", () => {
-        descargarEstadoCuentaPDF();
-    });
-
-    function actualizarPagos() {
-        pagosRealizadosElemento.textContent = pagos.length;
-        historialPagosElemento.innerHTML = "";
-        pagos.forEach(fecha => {
-            let li = document.createElement("li");
-            li.textContent = `Pago realizado el ${fecha}`;
-            historialPagosElemento.appendChild(li);
-        });
-
-        if (pagos.length > 0) {
-            descargarEstadoCuentaBtn.style.display = "block";
-        } else {
-            descargarEstadoCuentaBtn.style.display = "none";
-        }
-    }
-
-    function mostrarEstadoCuenta() {
-        let estadoCuenta = "Estado de Cuenta:\n\n";
-        pagos.forEach((fecha, index) => {
-            estadoCuenta += `Pago ${index + 1}: ${fecha}\n`;
-        });
-        alert(estadoCuenta);
-    }
-
-    function descargarEstadoCuentaPDF() {
-        if (typeof window.jspdf === "undefined") {
-            alert("jsPDF no está cargado correctamente.");
+        if (pagosRealizados.length === 0) {
+            alert("No hay pagos registrados.");
             return;
         }
 
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+        const ws = XLSX.utils.json_to_sheet(pagosRealizados); // Convierte los pagos en una hoja de Excel
+        const wb = XLSX.utils.book_new(); // Crea un nuevo libro de trabajo
+        XLSX.utils.book_append_sheet(wb, ws, "Estado de Cuenta"); // Agrega la hoja al libro
+        const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
 
-        doc.setFontSize(16);
-        doc.text("Estado de Cuenta", 20, 20);
-        doc.setFontSize(12);
-
-        if (pagos.length === 0) {
-            doc.text("No hay pagos registrados.", 20, 30);
-        } else {
-            pagos.forEach((fecha, index) => {
-                doc.text(`Pago ${index + 1}: ${fecha}`, 20, 30 + index * 10);
-            });
-        }
-
-        doc.save("estado_de_cuenta.pdf");
-    }
+        const blob = new Blob([wbout], { type: "application/octet-stream" }); // Crea un blob para la descarga
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "estado_de_cuenta.xlsx"; // Nombre del archivo de descarga
+        link.click();
+    });
 });
-
