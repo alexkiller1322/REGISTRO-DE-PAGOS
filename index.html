@@ -5,100 +5,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Pagos</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="manifest" href="manifest.json">
     <script defer src="app.js"></script>
     <!-- Fuente de iconos Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <h1>Registro de Pagos <i class="fas fa-dollar-sign"></i> <i class="fas fa-money-bill-wave"></i></h1>
+        <h1>Registro de Pagos</h1>
         <p>Pagos realizados: <span id="pagosRealizados">0</span> / 100</p>
         
-        <!-- Botón de seleccionar fecha de pago -->
-        <button id="seleccionarFechaPago">Selecciona Fecha de Pago</button>
-
-        <!-- Nuevo botón para descargar el estado de cuenta en Excel -->
-        <button id="descargarEstadoCuenta">Descargar Estado de Cuenta (Excel)</button>
+        <!-- Seleccionar fecha de pago -->
+        <input type="date" id="fechaPago" required>
         
-        <!-- Iconos de dinero como adornos -->
+        <!-- Botón para registrar pago -->
+        <button id="registrarPago">Registrar Pago</button>
+
+        <!-- Botón para descargar el estado de cuenta en formato Excel -->
+        <button id="generarEstadoCuenta">Generar Estado de Cuenta</button>
+
         <div class="iconos-dinero">
             <i class="fas fa-coins"></i>
             <i class="fas fa-dollar-sign"></i>
-            <i class="fas fa-money-bill-wave"></i>
             <i class="fas fa-wallet"></i>
             <i class="fas fa-credit-card"></i>
         </div>
     </div>
 
-    <!-- Selector de fecha oculto, solo se muestra cuando el usuario hace clic en "Seleccionar Fecha de Pago" -->
-    <div id="fechaPagoContainer" style="display:none;">
-        <label for="fechaPago">Selecciona la fecha del pago:</label>
-        <input type="date" id="fechaPago" name="fechaPago">
-        <button id="guardarPago">Guardar Pago</button>
-        <button id="cancelarPago">Cancelar</button>
-    </div>
-
-    <!-- Librería de SheetJS para generar el archivo Excel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script> 
-
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            let pagosRealizados = JSON.parse(localStorage.getItem("pagosRealizados")) || [];
+            let pagosRealizados = JSON.parse(localStorage.getItem("pagosRealizados")) || 0;
+            let fechasPagos = JSON.parse(localStorage.getItem("fechasPagos")) || [];
             const pagosMaximos = 100;
             const pagosRealizadosElemento = document.getElementById("pagosRealizados");
-            const seleccionarFechaPagoBtn = document.getElementById("seleccionarFechaPago");
-            const descargarEstadoCuentaBtn = document.getElementById("descargarEstadoCuenta");
-            const fechaPagoContainer = document.getElementById("fechaPagoContainer");
+            const registrarPagoBtn = document.getElementById("registrarPago");
             const fechaPagoInput = document.getElementById("fechaPago");
-            const guardarPagoBtn = document.getElementById("guardarPago");
-            const cancelarPagoBtn = document.getElementById("cancelarPago");
+            const generarEstadoCuentaBtn = document.getElementById("generarEstadoCuenta");
 
-            pagosRealizadosElemento.textContent = pagosRealizados.length;
+            // Mostrar los pagos realizados
+            pagosRealizadosElemento.textContent = pagosRealizados;
 
-            seleccionarFechaPagoBtn.addEventListener("click", () => {
-                if (pagosRealizados.length < pagosMaximos) {
-                    // Mostrar el selector de fecha
-                    fechaPagoContainer.style.display = "block";
-                } else {
-                    alert("Has alcanzado el límite de 100 pagos.");
-                }
-            });
-
-            guardarPagoBtn.addEventListener("click", () => {
+            // Registrar pago
+            registrarPagoBtn.addEventListener("click", () => {
                 const fechaPago = fechaPagoInput.value;
-                if (fechaPago) {
-                    pagosRealizados.push({ fecha: fechaPago });
+
+                if (fechaPago && pagosRealizados < pagosMaximos) {
+                    // Guardar pago y fecha
+                    pagosRealizados++;
+                    fechasPagos.push(fechaPago);
                     localStorage.setItem("pagosRealizados", JSON.stringify(pagosRealizados));
-                    pagosRealizadosElemento.textContent = pagosRealizados.length;
-                    fechaPagoContainer.style.display = "none"; // Ocultar el calendario
-                    fechaPagoInput.value = ""; // Limpiar el campo de fecha
+                    localStorage.setItem("fechasPagos", JSON.stringify(fechasPagos));
+
+                    // Actualizar el contador de pagos
+                    pagosRealizadosElemento.textContent = pagosRealizados;
+                } else if (pagosRealizados >= pagosMaximos) {
+                    alert("Has alcanzado el límite de 100 pagos.");
                 } else {
-                    alert("Por favor, selecciona una fecha.");
+                    alert("Por favor selecciona una fecha para el pago.");
                 }
             });
 
-            cancelarPagoBtn.addEventListener("click", () => {
-                fechaPagoContainer.style.display = "none"; // Ocultar el calendario
-                fechaPagoInput.value = ""; // Limpiar el campo de fecha
-            });
+            // Generar y descargar estado de cuenta
+            generarEstadoCuentaBtn.addEventListener("click", () => {
+                const estadoCuenta = fechasPagos.map((fecha, index) => `Pago ${index + 1}: ${fecha}`).join("\n");
 
-            // Función para descargar el estado de cuenta en formato Excel
-            descargarEstadoCuentaBtn.addEventListener("click", () => {
-                if (pagosRealizados.length === 0) {
-                    alert("No hay pagos registrados.");
-                    return;
-                }
-
-                const ws = XLSX.utils.json_to_sheet(pagosRealizados); // Convierte los pagos en una hoja de Excel
-                const wb = XLSX.utils.book_new(); // Crea un nuevo libro de trabajo
-                XLSX.utils.book_append_sheet(wb, ws, "Estado de Cuenta"); // Agrega la hoja al libro
-                const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-
-                const blob = new Blob([wbout], { type: "application/octet-stream" }); // Crea un blob para la descarga
+                // Crear un archivo Excel con los pagos y fechas
+                const blob = new Blob([estadoCuenta], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
                 const link = document.createElement("a");
                 link.href = URL.createObjectURL(blob);
-                link.download = "estado_de_cuenta.xlsx"; // Nombre del archivo de descarga
+                link.download = "estado_de_cuenta.xlsx";
                 link.click();
             });
         });
